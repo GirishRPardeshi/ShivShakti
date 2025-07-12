@@ -4,8 +4,34 @@ import datetime
 import os
 import pandas as pd
 from fpdf import FPDF
+import yagmail
 
 EXCEL_FILE = "bookings.xlsx"
+# ------------------ Email Sender ------------------
+def send_email_to_customer(recipient_email, customer_name, service, date, time, invoice_path):
+    sender = "shivshaktimobilejalgaon@gmail.com"
+    app_password = "your-app-password-here"  # Replace with your actual Gmail app password
+
+    subject = "Booking Confirmation - ShivShakti Mobile Repair"
+    content = f"""
+Dear {customer_name},
+
+Thank you for booking **{service}** service with us on **{date} at {time}**.
+
+We have attached the invoice for your records. We look forward to serving you at our shop.
+
+Regards,  
+Shop No 140, Third Floor, Golani Market, Jalgaon - 425001  
+📞 7030663155  
+"""
+
+    try:
+        yag = yagmail.SMTP(user=sender, password=app_password)
+        yag.send(to=recipient_email, subject=subject, contents=content, attachments=invoice_path)
+        return True
+    except Exception as e:
+        print("Email Error:", e)
+        return False
 
 
 # ----------------- Save to Excel -----------------
@@ -19,23 +45,73 @@ def save_booking(data_dict):
     df.to_excel(EXCEL_FILE, index=False)
 
 # ----------------- PDF Invoice Generator -----------------
+def clean(text):
+    return str(text).encode("ascii", "ignore").decode()# Remove non-ASCII characters
 def generate_invoice(data):
-    pdf = FPDF()
+    class InvoicePDF(FPDF):
+        def header(self):
+            self.set_font("Arial", 'B', 14)
+            self.cell(200, 10, "SHIVSHAKTI MOBILE REPAIRING", ln=True, align='C')
+            self.set_font("Arial", '', 11)
+            self.cell(200, 10, "Shop No 140, Third Floor, Golani Market, Jalgaon - 425001", ln=True, align='C')
+            self.ln(10)
+            self.line(10, 35, 200, 35)  # horizontal line
+
+        def footer(self):
+            self.set_y(-30)
+            self.set_font("Arial", 'I', 10)
+            self.multi_cell(0, 10,
+                "Thank you for choosing us!\nContact: 7030663155 | support@ShivShaktiMobileJalgaon.com",
+                align='C')
+
+    pdf = InvoicePDF()
     pdf.add_page()
-    pdf.set_font("Arial", 'B', 16)
-    pdf.cell(200, 10, "Mobile Repair Invoice", ln=True, align='C')
-    pdf.ln(10)
 
     pdf.set_font("Arial", size=12)
-    for key, value in data.items():
-        clean_key = key.encode("ascii", "ignore").decode()
-        clean_value = str(value).encode("ascii", "ignore").decode()
-        pdf.cell(200, 10, f"{clean_key}: {clean_value}", ln=True)
+    pdf.cell(200, 10, f"Invoice Date: {datetime.datetime.now().strftime('%d-%b-%Y')}", ln=True)
+
+    pdf.ln(5)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(60, 10, f"Customer Name:", 0)
+    pdf.cell(100, 10, data['Name'], ln=True)
+
+    pdf.cell(60, 10, f"Mobile Number:", 0)
+    pdf.cell(100, 10, data['Phone'], ln=True)
+
+    pdf.cell(60, 10, f"Service Booked:", 0)
+    pdf.cell(100, 10, clean(data['Service']), ln=True)
+
+    service_price = {
+    "📱 Screen Replacement": "Rs. 150",
+    "🔋 Battery Replacement": "Rs. 200",
+    "💧 Water Damage Repair": "Rs. 1200",
+    "⚡ Charging Port Repair": "Rs. 100",
+    "🔄 Software Update": "Rs. 400",
+    "🔓 Unlocking Services": "Rs. 250",
+    "🧼 Internal Cleaning": "Rs. 150",
+    "📈 Data Recovery": "Rs. 500",
+    "🛠️ Others": "Rs. 200"
+    }
+
+
+    price = service_price.get(data['Service'], "₹200")
+    pdf.cell(60, 10, f"Service Charge:", 0)
+    pdf.cell(100, 10, price, ln=True)
+
+    pdf.cell(60, 10, f"Preferred Date:", 0)
+    pdf.cell(100, 10, data['Date'], ln=True)
+
+    pdf.cell(60, 10, f"Preferred Time:", 0)
+    pdf.cell(100, 10, data['Time'], ln=True)
+
+    pdf.ln(10)
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(0, 10, "Amount Payable: " + price, ln=True)
 
     invoice_name = f"Invoice_{data['Name'].replace(' ', '_')}_{data['Timestamp'].replace(':', '-').replace(' ', '_')}.pdf"
     pdf.output(invoice_name)
-    return invoice_name
 
+    return invoice_name
 
 # ----------------- Page Config -----------------
 st.set_page_config(page_title="ShivShakti Mobile Repairing - Jalgaon", layout="centered", page_icon="📱")
@@ -121,6 +197,8 @@ with st.form("booking_form"):
     preferred_date = st.date_input("Preferred Date", datetime.date.today())
     preferred_time = st.time_input("Preferred Time(Open: 11:00 AM to 8:00 PM)", value=datetime.time(11, 0))
     submit_booking = st.form_submit_button("Book Now")
+    email = st.text_input("Email Address")
+
 
     if submit_booking:
         if datetime.time(11, 0) <= preferred_time <= datetime.time(20, 0):
@@ -140,6 +218,19 @@ with st.form("booking_form"):
                 }
                 save_booking(booking_data)
                 invoice_path = generate_invoice(booking_data)
+                email_sent = send_email_to_customer(
+                    recipient_email=email,
+                    customer_name=name,
+                    service=selected_service,
+                    date=preferred_date,
+                    time=preferred_time.strftime("%I:%M %p"),
+                    invoice_path=invoice_path
+                )
+
+                if email_sent:
+                    st.info("📧 Confirmation email sent to your inbox.")
+                else:
+                    st.warning("⚠️ Failed to send email. Please check your email address.")
                 st.success(f"✅ Booking confirmed for **{selected_service}** on **{preferred_date} at {preferred_time.strftime('%I:%M %p')}**. Thank you, {name}!")
         else:
             st.error("❌ Please choose a time between 11:00 AM and 8:00 PM.")

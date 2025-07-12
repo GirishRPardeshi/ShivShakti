@@ -198,8 +198,8 @@ with st.form("contact_form"):
             st.warning("Please enter a valid email address.")
         elif not c_message.strip():
             st.warning("Message cannot be empty.")
-    else:
-        st.success("Thank you! We have received your message and will get back to you soon.")
+        else:
+            st.success("Thank you! We have received your message and will get back to you soon.")
 
     st.markdown("📍 **Address:** Shop No 140 Third Floor Golani Market, Jalgaon – 425001")
     st.markdown("📞 **Phone:** +91-7030663155")

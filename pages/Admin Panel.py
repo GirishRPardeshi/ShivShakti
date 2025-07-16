@@ -81,15 +81,16 @@ if pw:
                 df_contact = pd.read_excel(CONTACT_FILE)
                 st.dataframe(df_contact)
 
-                # Optional: Delete a message
                 if not df_contact.empty:
-                    idx = st.number_input("Row index to delete from messages", 0, len(df_contact)-1)
-                    if st.button("🗑️ Delete Contact Message"):
-                        df_contact.drop(index=idx, inplace=True)
-                        df_contact.reset_index(drop=True, inplace=True)
+                    st.markdown("### ✅ Mark Message as Resolved")
+                    selected_index = st.number_input("Enter row index to mark as resolved", 0, len(df_contact)-1)
+
+                    if st.button("✅ Mark as Resolved"):
+                        df_contact.at[selected_index, "Status"] = "Resolved"
                         df_contact.to_excel(CONTACT_FILE, index=False)
-                        st.success("Contact message deleted.")
+                        st.success("Status updated to Resolved.")
                         st.rerun()
+
             else:
                 st.info("No contact messages yet.")
 

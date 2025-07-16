@@ -305,8 +305,10 @@ with st.form("contact_form"):
                 "Email": c_email,
                 "Phone": c_phone,
                 "Message": c_message,
+                "Status": "Pending",  # Default status
                 "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
+                }
+
             save_contact(contact_data)
             st.success("Thank you! We have received your message.")
 

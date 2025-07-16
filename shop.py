@@ -22,7 +22,7 @@ We have attached the invoice for your records. We look forward to serving you at
 
 Regards,  
 Shop No 140, Third Floor, Golani Market, Jalgaon - 425001  
-📞 7030663155  
+📞 8698280515  
 """
 
     try:
@@ -61,7 +61,7 @@ def generate_invoice(data):
             self.set_y(-30)
             self.set_font("Arial", 'I', 10)
             self.multi_cell(0, 10,
-                "Thank you for choosing us!\nContact: 7030663155 | support@ShivShaktiMobileJalgaon.com",
+                "Thank you for choosing us!\nContact: 8698280515 | shivshaktirepairingjalgaon@gmail.com",
                 align='C')
 
     pdf = InvoicePDF()
@@ -112,6 +112,18 @@ def generate_invoice(data):
     pdf.output(invoice_name)
 
     return invoice_name
+
+# -------------User Message-------------
+CONTACT_FILE = "contact_messages.xlsx"
+def save_contact(data_dict):
+    df_new = pd.DataFrame([data_dict])
+    if os.path.exists(CONTACT_FILE):
+        df_existing = pd.read_excel(CONTACT_FILE)
+        df = pd.concat([df_existing, df_new], ignore_index=True)
+    else:
+        df = df_new
+    df.to_excel(CONTACT_FILE, index=False)
+
 
 # ----------------- Page Config -----------------
 st.set_page_config(page_title="ShivShakti Mobile Repairing - Jalgaon", layout="centered", page_icon="📱")
@@ -185,7 +197,6 @@ for s in services:
 st.markdown("---")
 st.markdown("## 📅 Book a Service")
 
-import os
 
 invoice_path = None  # initialize before form
 downloaded_invoice = False  # track download
@@ -265,7 +276,6 @@ st.write("A: Yes, within Jalgaon city limits.")
 # ----------------- About Us -----------------
 st.markdown("---")
 st.markdown("## ℹ️ About Us")
-#st.image("ironman.jpg", width=400)
 st.markdown("""
 We are a trusted mobile repair shop operating in Jalgaon for over **15 years**. Our expert technicians provide both software and hardware solutions. We have served **10,000+ happy customers**.
 """)
@@ -290,11 +300,20 @@ with st.form("contact_form"):
         elif not c_message.strip():
             st.warning("Message cannot be empty.")
         else:
-            st.success("Thank you! We have received your message and will get back to you soon.")
+            contact_data = {
+                "Name": c_name,
+                "Email": c_email,
+                "Phone": c_phone,
+                "Message": c_message,
+                "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            save_contact(contact_data)
+            st.success("Thank you! We have received your message.")
+
 
     st.markdown("📍 **Address:** Shop No 140 Third Floor Golani Market, Jalgaon – 425001")
-    st.markdown("📞 **Phone:** +91-7030663155")
-    st.markdown("✉️ **Email:** support@ShivShaktimobilejalgaon.com")
+    st.markdown("📞 **Phone:** +91-8698280515")
+    st.markdown("✉️ **Email:** shivshaktirepairingjalgaon@gmail.com")
 
 # ----------------- Footer -----------------
 st.markdown("---")

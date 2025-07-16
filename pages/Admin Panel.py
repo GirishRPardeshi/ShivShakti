@@ -4,6 +4,7 @@ import pandas as pd
 import altair as alt
 
 EXCEL_FILE = "bookings.xlsx"
+CONTACT_FILE = "contact_messages.xlsx"
 ADMIN_PASSWORD = "Girish7871" 
 
 # ------------------ Admin Panel ------------------
@@ -71,6 +72,27 @@ if pw:
                 os.remove(EXCEL_FILE)
                 st.success("All bookings deleted.")
                 st.rerun()
+                
+            #-----------User Messages------------   
+            st.markdown("---")
+            st.subheader("📩 Contact Messages")
+
+            if os.path.exists(CONTACT_FILE):
+                df_contact = pd.read_excel(CONTACT_FILE)
+                st.dataframe(df_contact)
+
+                # Optional: Delete a message
+                if not df_contact.empty:
+                    idx = st.number_input("Row index to delete from messages", 0, len(df_contact)-1)
+                    if st.button("🗑️ Delete Contact Message"):
+                        df_contact.drop(index=idx, inplace=True)
+                        df_contact.reset_index(drop=True, inplace=True)
+                        df_contact.to_excel(CONTACT_FILE, index=False)
+                        st.success("Contact message deleted.")
+                        st.rerun()
+            else:
+                st.info("No contact messages yet.")
+
         else:
             st.warning("No bookings yet.")
     else:

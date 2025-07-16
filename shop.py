@@ -9,7 +9,7 @@ import yagmail
 EXCEL_FILE = "bookings.xlsx"
 # ------------------ Email Sender ------------------
 def send_email_to_customer(recipient_email, customer_name, service, date, time, invoice_path):
-    sender = "shivshaktimobilejalgaon@gmail.com"
+    sender = "shivshaktirepairingjalgaon@gmail.com"
     app_password = "deyhubuvehibgjkk"  # Replace with your actual Gmail app password
 
     subject = "Booking Confirmation - ShivShakti Mobile Repair"

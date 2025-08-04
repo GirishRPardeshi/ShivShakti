@@ -169,7 +169,7 @@ st.markdown("---")
 
 # ----------------- Home Section -----------------
 st.markdown("## 🏠 Welcome")
-with open("images/demo.mp4", "rb") as video_file:
+with open("images/poster.mp4", "rb") as video_file:
     video_bytes = video_file.read()
     st.video(video_bytes)
 

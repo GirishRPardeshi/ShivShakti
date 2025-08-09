@@ -37,8 +37,8 @@ project/
 
 
 ## 📬 Contact
-**Email**: support@ShivShaktimobilejalgaon.com  
+**Email**: shivshaktirepairingjalgaon@gmail.com  
 **Phone**: +91-7030663155  
-**Website**: [Streamlit App](https://your-app.streamlit.app) *(after deployment)*
+**Website**: [Streamlit App](https://shivshaktimobilejalgaon.streamlit.app/)
 
 © 2025 Girish Pardeshi. All rights reserved.
